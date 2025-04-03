@@ -1,0 +1,61 @@
+practical 8 : Packet tracer layer 2 security
+
+
+configure STP 
+
+Assign Central as the primary root bridge
+Central(config)# spanning-tree vlan 1 root primary
+
+
+Assign SW-1 as a secondary root bridge
+SW-1(config)# spanning-tree vlan 1 root secondary
+
+
+Verify the spanning-tree configuration.
+Central# show spanning-tree
+
+
+Enable PortFast on all access ports. 
+SW-A(config)# interface range f0/1 - 4
+SW-A(config-if-range)# spanning-tree portfast
+
+SW-B(config)# interface range f0/1 - 4
+SW-B(config-if-range)# spanning-tree portfast
+
+
+Enable BPDU guard on all access ports. 
+SW-A(config)# interface range f0/1 - 4
+SW-A(config-if-range)# spanning-tree bpduguard enable
+
+SW-B(config)# interface range f0/1 - 4
+SW-B(config-if-range)# spanning-tree bpduguard enable
+
+
+Enable root guard. 
+SW-1(config)# interface range f0/23 - 24
+SW-1(config-if-range)# spanning-tree guard root
+
+SW-2(config)# interface range f0/23 - 24
+SW-2(config-if-range)# spanning-tree guard root
+
+
+
+ Configure Port Security and Disable Unused Ports 
+
+SW-A(config)# interface range f0/1 - 22
+SW-A(config-if-range)# switchport mode access
+SW-A(config-if-range)# switchport port-security
+SW-A(config-if-range)# switchport port-security maximum 2
+SW-A(config-if-range)# switchport port-security violation shutdown SW-A(config-if-range)# switchport port-security mac-address sticky
+
+SW-B(config)# interface range f0/1 - 22
+SW-B(config-if-range)# switchport mode access
+SW-B(config-if-range)# switchport port-security
+SW-B(config-if-range)# switchport port-security maximum 2
+SW-B(config-if-range)# switchport port-security violation shutdown
+SW-B(config-if-range)# switchport port-security mac-address sticky
+
+
+Verify port security. 
+
+SW-A# show port-security interface f0/1
