@@ -1,0 +1,133 @@
+Configuring IPv6 ACLs (Prac 5 in pdf)
+
+Create the physical network structure as given in the manual.
+IP Configuration
+
+/*Router1: R1:
+Interface 1: R1-PC1 - 2001:DB8:1:10::1
+Interface 2: R1-PC2 - 2001:DB8:1:11::1
+Interface 3: R1-R2 - 2001::2
+*/
+Router 1 (R1)
+
+int gig0/0
+ipv6 address 2001:DB8:1:10::1/64
+no shut
+
+int gig0/1
+ipv6 address 2001:DB8:1:11::1/64
+no shut
+
+int se0/0/0
+ipv6 address 2001::2/64
+no shut
+
+
+/*Router2: R2:
+Interface1: R2-R1 - 2001::1
+Interface2: R2-R3 - 2002::1
+*/
+Router 2 (R2)
+
+int se0/0/0
+ipv6 address 2001::1/64
+no shut
+
+int se0/0/1
+ipv6 address 2002::1/64
+no shut
+
+
+/Router3: R3:
+Interface1: R3-R2 - 	2002::2
+Interface2: R3-Server - 2001:DB8:1:30::2
+*/
+Router 3 (R3)
+
+int se0/0/0
+ipv6 address 2002::2/64
+no shut
+
+int gig0/0
+ipv6 address 2001:DB8:1:30::2/64
+
+
+/*PC and server configuration
+PC1 -  2001:DB8:1:10::2/64		Gateway- 2001:DB8:1:10::1
+PC2 - 2001:DB8:1:11::2/64		Gateway- 2001:DB8:1:11::1
+Server - 2001:DB8:1:30::1/64	Gateway- 2001:DB8:1:30::2
+*/
+
+
+//IPV6 OSPF Routing
+//Give following commands on all routers (Config prompt)
+
+Router 1 (R1)
+ipv6 unicast-routing
+ipv6 router ospf 1
+router-id 1.1.1.1
+
+Router 2 (R2)
+
+ipv6 unicast-routing
+ipv6 router ospf 1
+router-id 2.2.2.2
+
+Router 3 (R3)
+
+ipv6 unicast-routing
+ipv6 router ospf 1
+router-id 3.3.3.3
+
+
+//Give following command on all router’s all interfaces
+
+//Router1:
+	int gig0/0
+	ipv6 ospf 1 area 0
+
+	int gig0/1
+	ipv6 ospf 1 area 0
+
+	int se0/0/0
+	ipv6 ospf 1 area 0
+
+
+//Similarly complete routing on Router2 and Router3
+//Test the connectivity in longest route
+//PC1 – Server: Ping successful
+//PC2 – Server: Ping successful
+
+
+
+Security Implementation:
+Configure, Apply, and Verify an IPv6 ACL 
+Logs indicate that a computer on the 2001:DB8:1:11::0/64 network is repeatedly refreshing a web page. This is causing a Denial-of-Service (DoS) attack against Server3. Until the client can be identified and cleaned, you must block HTTP and HTTPS access to that network with an access list. 
+
+Step 1: Configure an ACL that will block HTTP and HTTPS access. 
+//Create ACL named BLOCK_HTTP
+//Restrict HTTP and HTTPS access from PC2 to Server and permit other traffic
+//Create ACL on router which is connected to PC2 that is Router1
+///ACL
+
+ipv6 access_list BLOCK_HTTP
+deny tcp any host 2001:DB8:1:30::30 eq www
+deny tcp any host 2001:DB8:1:30::30 eq 443
+permit ipv6 any any
+
+
+Step 2: Apply ACL on appropriate interface 
+//Enable ACL on router’s interface which is connected to PC2
+
+interface GigabitEthernet0/1
+ ipv6 traffic-filter BLOCK_HTTP in
+
+
+Step 3: Test the ACL
+//Test from PC1-Server
+
+PC1-Server - http (https, ping - successful)
+
+//Test  from PC2-Server
+
+PC2-Server - http (https - unsuccessful, ping - successful)
