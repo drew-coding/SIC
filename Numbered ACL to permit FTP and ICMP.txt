@@ -1,0 +1,28 @@
+Configuring Extended ACLs - Scenario 1 (Prac 3 in pdf)
+
+// Configure, Apply and Verify an Extended Numbered ACL
+
+// Configure an ACL to permit FTP and ICMP
+
+/* Steps to follow while using ACL
+1. To create ACL
+2. To apply ACL on router's interface
+3. To test working of ACL
+*/
+
+/* First create and configure network structure as given in the practical manual*/
+
+
+//Following command will permit ftp traffic from PC1 to server
+ access-list 100 permit tcp 172.22.34.64  0.0.0.31 host 172.22.34.62 eq ftp
+
+
+//Following command will permit icmp traffic from PC1 to server
+access-list 100 permit icmp 172.22.34.64 0.0.0.31  host 172.22.34.62
+
+
+//Apply the ACL on the correct interface to filter traffic
+//Give following command on gig0/0 of router which is connected to PC1
+
+ interface gigabitEthernet 0/0 
+ ip access-group 100 in
