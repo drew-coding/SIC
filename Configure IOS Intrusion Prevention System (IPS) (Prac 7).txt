@@ -1,0 +1,72 @@
+Configure IOS Intrusion Prevention System (IPS) Using the CLI
+
+Create the network structure as given in the manual.
+
+Verify network connectivity
+Ping from PC-C to PC-A. The ping should be successful. 
+Ping from PC-A to PC-C. The ping should be successful.
+
+Security Implementation
+
+Create an IOS IPS configuration directory in flash
+
+#mkdir ipsdir
+
+Configure the IPS signature storage location
+#ip ips config location flash:ipsdir
+
+
+Create an IPS rule
+#ip ips name iosips
+
+Enable logging
+R1 config
+
+ip ips notify log
+service timestamps log datetime msec
+logging host 192.168.1.50
+
+
+
+Configure IOS IPS to use the signature categories
+R1 config
+
+ip ips signature-category 
+category all 
+retired true 
+exit
+category ios_ips basic 
+retired false
+exit
+
+Apply the IPS rule to an interface
+R1 config
+
+interface g0/1
+ip ips iosips out
+
+
+
+Modify the Signature
+Change the event-action of a signature
+Un-retire the echo request signature (signature 2004, subsig ID 0), enable it, and change the signature action to alert and drop.
+
+R1 config
+
+ip ips signature-definition
+signature 2004 0
+status
+retired false
+enabled true
+exit
+engine
+event-action produce-alert
+event-action deny-packet-inline
+exit
+exit
+exit
+
+//Testing 
+Ping from PC to Server – Unsuccessful
+Ping from Server to PC - Successful
+View the syslog messages on the server
