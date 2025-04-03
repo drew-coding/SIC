@@ -148,12 +148,11 @@ logging messages received from the routers.
 //SSH - Secure Shell Configuration
 
 //Configure R3 to Support SSH Connections 
-
+//Configure user and password for SSH on Router3(Config)
 ip domain-name testsecurity.com
 
 hostname testsecurity
 
-//Configure user and password for SSH on Router3(Config)
 username SSHadmin privilege 15 secret passwd55
 
 //Configure the incoming vty lines on R3
@@ -161,12 +160,6 @@ username SSHadmin privilege 15 secret passwd55
 //These commands will enable telnet on R3
 line vty 0 4
 login local
-
-
-//Test telnet connectivity from PC
-//Open command prompt from PC and give following commands
-telnet 192.168.3.1 (this is ip address of Router3)
-
 
 //Now start to enable SSH that is secure shell , 
 //secure way of telnet
@@ -189,6 +182,11 @@ crypto key generate rsa
 //Attempt to connect to R3 via Telnet from PC-C.
  telnet 192.168.3.1
 //This connection would fail
+
+//Test telnet connectivity from PC
+//Open command prompt from PC and give following commands
+telnet 192.168.3.1 (this is ip address of Router3)
+
 
 
 // Connect to R3 using SSH on PC-C
