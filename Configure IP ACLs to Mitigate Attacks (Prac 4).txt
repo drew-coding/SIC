@@ -1,0 +1,75 @@
+Configure IP ACLs to Mitigate Attacks. (Practical 4 in pdf)
+
+//Network configuration
+
+//For loopback interface
+int Lo0
+ip addr 192.168.2.1 255.255.255.0
+
+//Rest of the network configuration remains same
+
+//Routing
+router ospf 1  //all routers
+//Router1
+network 192.168.1.0 0.0.0.255 area 0
+network 10.1.1.0 0.0.0.3 area 0
+
+//Router2
+network 10.1.1.0 0.0.0.3 area 0
+network 10.2.2.0 0.0.0.3 area 0
+network 192.168.2.0 0.0.0.255 area 0
+
+
+//Router3
+network 192.168.3.0 0.0.0.255 area 0
+network 10.2.2.0 0.0.0.3 area 0
+
+
+Verify Basic Network Connectivity 
+
+1. From PC-A (server), verify connectivity to PC-C and R2.
+2.  From PC-C, verify connectivity to PC-A and R2. 
+//Configure SSH on router 2
+
+
+
+Security Implementation: 
+Configure ACL 10 to block all remote access to the routers except from PC-C 
+
+//Give following commands on all routers
+	access-list 10 permit host 192.168.3.3
+	line vty 0 4
+	access-class 10 in
+
+//Testing
+// PC to router SSH – Successful
+// Server to router SSH - Unsuccessful
+
+
+Create Numbered ACL 120 and permit any outside host to access DNS, SMTP and FTP services on server PC-A. 
+Deny any outside host access to HTTPS services on PC-A.
+//Router1
+
+access-list 120 permit udp any host 192.168.1.3 eq domain
+access-list 120 permit tcp any host 192.168.1.3 eq smtp
+access-list 120 permit tcp any host 192.168.1.3 eq ftp
+access-list 120 deny tcp any host 192.168.1.3 eq 443
+access-list 120 permit tcp host 192.168.3.3 host 10.1.1.1 eq 22
+	
+Enable ACL on appropriate interface
+	int se0/0/0
+ 	ip access-group 120 in
+//Testing
+// PC to Server using DNS, FTP,SMTP(mail) – Successful
+// PC to Server using https - Unsuccessful
+
+Permit ICMP echo replies and destination unreachable messages from the outside network (relative to R1). 
+Deny all other incoming ICMP packets
+
+access-list 120 permit icmp any any echo-reply
+access-list 120 permit icmp any any unreachable
+access-list 120 deny icmp any any
+access-list 120 permit ip any any
+
+//Testing
+//Ping command with echo-reply - Successful
