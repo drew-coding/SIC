@@ -1,0 +1,198 @@
+Configure Cisco Routers for Syslog, NTP, and SSH Operations
+Network Configuration
+
+//Practical 1 - Refer network diagram from practical manual pdf
+CIDR
+IPAddress/no.of1s in netmask
+
+
+//Router1
+se0/0/0	10.1.1.1 255.255.255.252
+10.1.1.1/30
+
+gig0/0	192.168.1.1 255.255.255.0
+192.168.1.1/24
+
+
+//Router2
+se0/0/0 10.1.1.2 255.255.255.252
+se0/0/1 10.2.2.2 255.255.255.252
+
+
+//Router3
+se0/0/0 10.2.2.1 255.255.255.252
+gig0/0 192.168.3.1 255.255.255.0
+
+
+//Server1-PC-A
+192.168.1.5 255.255.255.0 
+Gateway = 192.168.1.1
+
+
+//Server2-PC-B
+192.168.1.6 255.255.255.0
+Gateway = 192.168.1.1
+
+
+//PC
+192.168.3.5 255.255.255.0
+Gateway = 192.168.3.1
+
+
+Networks in the given structure
+R1-R2 = 10.1.1.0	255.255.255.252 
+
+R2-R3 = 10.2.2.0	255.255.255.252
+
+Server-R1 = 192.168.1.0	255.255.255.0
+
+PC-R3 = 192.168.3.0	255.255.255.0
+
+
+//Routing
+//Router1
+router ospf 1
+network 10.1.1.0 0.0.0.3 area 0
+network 192.168.1.0 0.0.0.255 area 0
+
+
+//Router2
+router ospf 1
+network 10.1.1.0 0.0.0.3 area 0
+network 10.2.2.0 0.0.0.3 area 0
+
+
+//Router3
+router ospf 1
+network 10.2.2.0 0.0.0.3 area 0
+network 192.168.3.0 0.0.0.255 area 0
+
+
+//Check routing table
+show ip route
+
+
+
+Security Implementation
+
+Part 1: Configure OSPF MD5 Authentication 
+
+//Give following commands on all routers (router-config prompt)
+	router ospf 1
+	area 0 authentication message-digest
+
+
+//Give following commands on all routers on each serial interface
+//Router1
+	interface se0/0/0
+	ip ospf message-digest-key 1 md5 MD5pa55
+
+//Router2
+	interface se0/0/0
+	ip ospf message-digest-key 1 md5 MD5pa55
+	
+	interface se0/0/1
+	ip ospf message-digest-key 1 md5 MD5pa55
+
+//Router3
+	interface se0/0/0
+	ip ospf message-digest-key 1 md5 MD5pa55
+
+//To verify configuration
+//Give following command (router #prompt)
+	show ip ospf interface
+
+//Also test connectivity between any two routers
+//If same passwords are set on both the ends then 
+//you should get connection between two routers
+
+
+
+Part 2: Configure NTP  - Network Time Protocol
+
+// Enable NTP authentication on PC-A.
+// On PC-A, click NTP under the Services tab to verify NTP service is enabled.
+// To configure NTP authentication, click Enable under 
+//Authentication. 
+//Use key 1 and password NTPpa55 for authentication. 
+
+//Give following commands on all routers (router config prompt)
+
+ ntp server 192.168.1.5
+ ntp update-calendar
+ ntp authenticate 
+ ntp trusted-key 1
+ ntp authentication-key 1 md5 NTPpa55 
+
+//To verify give following commands on router #prompt
+ show clock
+ show clock details
+
+//It should show server's clock details
+
+
+
+Part 3: Configure Routers to Log Messages to the Syslog Server 
+
+// Configure the routers to identify the remote host (Syslog Server) that will receive
+//logging messages.
+
+logging host 192.168.1.6
+
+//To verify
+1. Use the command show logging to verify logging has been enabled. 
+2. From the Services tab of the Syslog Server’s dialogue box, select the Syslog services button. Observe the
+logging messages received from the routers.
+
+
+//SSH - Secure Shell Configuration
+
+//Configure R3 to Support SSH Connections 
+
+ip domain-name testsecurity.com
+
+hostname testsecurity
+
+//Configure user and password for SSH on Router3(Config)
+username SSHadmin privilege 15 secret passwd55
+
+//Configure the incoming vty lines on R3
+//Give following commands on config prompt
+//These commands will enable telnet on R3
+line vty 0 4
+login local
+
+
+//Test telnet connectivity from PC
+//Open command prompt from PC and give following commands
+telnet 192.168.3.1 (this is ip address of Router3)
+
+
+//Now start to enable SSH that is secure shell , 
+//secure way of telnet
+//Give following commands on Router3
+transport input ssh
+
+
+//Erase existing key pairs on R3
+ crypto key zeroize rsa
+
+
+// Generate the RSA encryption key pair for R3
+crypto key generate rsa
+
+//It will ask for number of bit for keys
+//Enter 1024
+//You will receive message of key generation
+
+//After enabling ssh system wont allow to do telnet connection
+//Attempt to connect to R3 via Telnet from PC-C.
+ telnet 192.168.3.1
+//This connection would fail
+
+
+// Connect to R3 using SSH on PC-C
+
+ ssh –l SSHadmin 192.168.3.1
+//It will ask for password , enter the password which you have given 
+//while ssh configuration
