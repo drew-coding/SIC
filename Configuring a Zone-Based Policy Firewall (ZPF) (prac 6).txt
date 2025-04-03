@@ -1,0 +1,75 @@
+Practical 6: Configuring a Zone-Based Policy Firewall (ZPF)
+
+Network configuration:
+
+ Create network structure same as given in the manual
+
+
+Configure SSH on Router2
+Verify basic connectivity
+Ping from PC to Server
+SSH from PC to Router2
+Web browser access from PC to server
+
+
+Security Implementation:
+
+Create the Firewall Zones on R3 config prompt
+
+#license boot module c1900 technology-package securityk9
+
+Create an internal zone and external zone
+
+#zone security IN-ZONE
+#zone security OUT-ZONE
+
+Create an ACL that defines internal traffic generating from 192.168.3.0 network
+
+#access-list 101 permit ip 192.168.3.0 0.0.0.255 any
+
+Create a class map referencing the internal traffic ACL.
+
+#class-map type inspect match-all IN-NET-CLASS-MAP
+#match access-group 101
+#exit
+
+
+Create a policy map
+on Router3 config
+
+#policy-map type inspect IN-2-OUT-PMAP
+#class type inspect IN-NET-CLASS-MAP
+#inspect
+
+
+Apply Firewall Policies
+Create a pair of zones
+on Router3 config
+
+#zone-pair security IN-2-OUT-ZPAIR source IN-ZONE destination OUT-ZONE
+#service-policy type inspect IN-2-OUT-PMAP
+#exit
+
+
+Assign interfaces to the appropriate security zones
+on Router3 config
+
+interface g0/1
+zone-member security IN-ZONE
+exit
+
+interface s0/0/1
+zone-member security OUT-ZONE
+
+
+Test Firewall Functionality from IN-ZONE to OUT-ZONE
+
+#Open SSH session from PC to router 
+#Open ftp session from PC to server
+
+(Open only one connection at a time and inspect the session)
+Inspect the current session with following command
+
+Router# prompt
+
+#show policy-map type inspect zone-pair sessions
