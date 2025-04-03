@@ -35,6 +35,7 @@ access-list 100 permit icmp 172.22.34.64 0.0.0.31  host 172.22.34.62
  ip access-list extended HTTP_ONLY 
  permit tcp 172.22.34.96 0.0.0.15 host 172.22.34.62 eq www
  permit icmp 172.22.34.96 0.0.0.15 host 172.22.34.62
+ exit
 
 // Apply the ACL on the correct interface to filter traffic. 
 
