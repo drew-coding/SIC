@@ -1,0 +1,81 @@
+//Enabling ACL for incoming traffic on router1 gig0/0 interface
+//Configure, Apply and Verify an Extended Named ACL
+ 
+Named ACL
+
+Scenario 1 
+//Configure an ACL to permit HTTP access and ICMP
+ R1 config
+
+ ip access-list extended HTTP_ONLY 
+ permit tcp 172.22.34.96 0.0.0.15 host 172.22.34.62 eq www
+ permit icmp 172.22.34.96 0.0.0.15 host 172.22.34.62
+ exit
+
+// Apply the ACL on the correct interface to filter traffic. 
+
+ interface gigabitEthernet 0/1
+ ip access-group HTTP_ONLY in
+
+Testing
+
+On PC2
+Ping from PC2 to server is successful
+FTP from PC2 to server is unsuccessful
+PC2 to web browser access done successful
+
+
+
+Scenario 2
+
+Switch 0 /Switch A
+int     vlan1
+no shut
+(ip addr ipaddress netmask)
+ip   addr   10.101.117.50    255.255.255.248 
+no shut
+(ip default-gateway ipaddressofgateway)
+ip   default-gateway   10.101.117.49 
+
+
+//First configure SSH on the switch C
+//Give following commands on swich C
+
+ip domain-name testsecurity.com
+hostname testsecurity
+Username SSHadmin privilege 15 secret passwd55
+line vty 0 4
+login local
+transport input ssh  
+crypto key generate rsa
+//It will ask for number of bit for keys
+//Enter 1024
+
+
+
+//Give following commands on router to create ACL
+
+Router config
+
+ip access-list extended HTTP_ONLY
+permit tcp   10.101.117.32   0.0.0.15   10.101.117.0  0.0.0.31   eq   22
+permit icmp any any
+exit
+
+Router config
+
+interface gigabitEthernet 0/1
+ ip access-group HTTP_ONLY in/out
+
+
+
+Testing
+
+PCB - ping 10.101.117.2
+ssh -l SSHadmin 10.101.117.2 and enter password
+
+
+Output 
+
+Ping from PCB to switch C is successful
+SSH from PCB to switch C is Succesfull
