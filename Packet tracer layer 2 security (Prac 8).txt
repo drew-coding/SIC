@@ -46,7 +46,8 @@ SW-A(config)# interface range f0/1 - 22
 SW-A(config-if-range)# switchport mode access
 SW-A(config-if-range)# switchport port-security
 SW-A(config-if-range)# switchport port-security maximum 2
-SW-A(config-if-range)# switchport port-security violation shutdown SW-A(config-if-range)# switchport port-security mac-address sticky
+SW-A(config-if-range)# switchport port-security violation shutdown 
+SW-A(config-if-range)# switchport port-security mac-address sticky
 
 SW-B(config)# interface range f0/1 - 22
 SW-B(config-if-range)# switchport mode access
